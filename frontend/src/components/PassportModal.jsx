@@ -1,4 +1,6 @@
+import { useRef } from 'react'
 import { X, FileText, MapPin, Droplet, Fish, Calendar, AlertTriangle, Download, Printer, Stamp } from 'lucide-react'
+import html2pdf from 'html2pdf.js'
 
 const conditionLabels = {
   1: { text: 'Отличное', color: 'text-green-600' },
@@ -9,6 +11,7 @@ const conditionLabels = {
 }
 
 export default function PassportModal({ object, onClose }) {
+  const contentRef = useRef(null)
   const condition = conditionLabels[object.technical_condition]
   
   const formatDate = (dateStr) => {
@@ -23,56 +26,33 @@ export default function PassportModal({ object, onClose }) {
     window.print()
   }
 
-  const handleDownload = () => {
-    // Create text content for download
-    const content = `
-ПАСПОРТ ВОДНОГО ОБЪЕКТА
-Республика Казахстан
-Комитет по водным ресурсам
+  const handleDownload = async () => {
+    if (!contentRef.current) return
 
-═══════════════════════════════════════════════════
+    const opt = {
+      margin: 10,
+      filename: `passport_${object.id}_${object.name.replace(/\s+/g, '_')}.pdf`,
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { 
+        scale: 2,
+        useCORS: true,
+        letterRendering: true
+      },
+      jsPDF: { 
+        unit: 'mm', 
+        format: 'a4', 
+        orientation: 'portrait' 
+      }
+    }
 
-НАИМЕНОВАНИЕ: ${object.name}
-РЕГИОН: ${object.region}
-ТИП ОБЪЕКТА: ${object.resource_type}
+    // Temporarily hide buttons for PDF
+    const buttons = contentRef.current.parentElement.querySelector('.print\\:hidden')
+    if (buttons) buttons.style.display = 'none'
 
-═══════════════════════════════════════════════════
+    await html2pdf().set(opt).from(contentRef.current).save()
 
-ХАРАКТЕРИСТИКИ:
-
-Тип воды: ${object.water_type || 'Не указан'}
-Наличие фауны: ${object.fauna ? 'Да' : 'Нет'}
-${object.fauna_description ? `Виды: ${object.fauna_description}` : ''}
-
-═══════════════════════════════════════════════════
-
-ТЕХНИЧЕСКОЕ СОСТОЯНИЕ:
-
-Категория: ${object.technical_condition} (${condition.text})
-Дата обследования: ${formatDate(object.passport_date)}
-
-═══════════════════════════════════════════════════
-
-МЕСТОПОЛОЖЕНИЕ:
-
-Широта: ${object.latitude.toFixed(6)}°
-Долгота: ${object.longitude.toFixed(6)}°
-
-═══════════════════════════════════════════════════
-
-${object.description ? `ОПИСАНИЕ:\n${object.description}` : ''}
-
-Документ сформирован: ${new Date().toLocaleDateString('ru-RU')}
-Система GidroAtlas v1.0
-    `.trim()
-
-    const blob = new Blob([content], { type: 'text/plain;charset=utf-8' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `passport_${object.id}_${object.name.replace(/\s+/g, '_')}.txt`
-    a.click()
-    URL.revokeObjectURL(url)
+    // Restore buttons
+    if (buttons) buttons.style.display = ''
   }
 
   return (
@@ -110,7 +90,7 @@ ${object.description ? `ОПИСАНИЕ:\n${object.description}` : ''}
         </div>
 
         {/* Document content */}
-        <div className="p-8 text-slate-800">
+        <div ref={contentRef} className="p-8 text-slate-800">
           {/* Header */}
           <div className="text-center border-b-2 border-slate-300 pb-6 mb-6">
             <div className="flex items-center justify-center gap-3 mb-2">

@@ -110,7 +110,7 @@ export default function PriorityTable() {
   }
 
   return (
-    <div className="fixed right-0 top-16 bottom-0 w-[520px] z-[9999]">
+    <div className="fixed inset-0 sm:inset-auto sm:right-0 sm:top-16 sm:bottom-0 w-full sm:w-[520px] z-[9999]">
       {/* Glow */}
       <div className="absolute inset-0 bg-gradient-to-l from-cyan-500/10 to-transparent pointer-events-none"></div>
       

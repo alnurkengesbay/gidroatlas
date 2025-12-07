@@ -64,7 +64,7 @@ export default function PassportModal({ object, onClose }) {
       />
       
       {/* Modal */}
-      <div className="relative w-full max-w-2xl max-h-[90vh] overflow-auto bg-[#faf8f5] rounded-lg shadow-2xl print:shadow-none print:max-h-none print:overflow-visible">
+      <div className="relative w-full max-w-2xl max-h-[95vh] sm:max-h-[90vh] overflow-auto bg-[#faf8f5] rounded-t-lg sm:rounded-lg shadow-2xl print:shadow-none print:max-h-none print:overflow-visible">
         {/* Header buttons - hide on print */}
         <div className="absolute top-4 right-4 flex gap-2 print:hidden z-10">
           <button

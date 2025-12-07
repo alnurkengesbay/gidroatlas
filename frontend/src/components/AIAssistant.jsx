@@ -155,11 +155,11 @@ export default function AIAssistant() {
   }
 
   const size = isExpanded 
-    ? 'w-[500px] h-[600px]' 
-    : 'w-[380px] h-[480px]'
+    ? 'w-full sm:w-[500px] h-full sm:h-[600px]' 
+    : 'w-full sm:w-[380px] h-[70vh] sm:h-[480px]'
 
   return (
-    <div className={`fixed right-4 bottom-4 ${size} z-[9999] transition-all duration-300`}>
+    <div className={`fixed inset-0 sm:inset-auto sm:right-4 sm:bottom-4 ${size} z-[9999] transition-all duration-300`}>
       {/* Glow effect */}
       <div className="absolute inset-0 bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-2xl blur-xl"></div>
       

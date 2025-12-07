@@ -73,8 +73,8 @@ export default function Sidebar() {
   ].filter(Boolean).length
 
   return (
-    <aside className={`bg-slate-900/80 backdrop-blur-xl border-r border-cyan-500/20 transition-all duration-300 ${
-      showFilters ? 'w-80' : 'w-0'
+    <aside className={`fixed sm:relative inset-y-0 left-0 bg-slate-900/95 sm:bg-slate-900/80 backdrop-blur-xl border-r border-cyan-500/20 transition-all duration-300 z-[100] ${
+      showFilters ? 'w-[85vw] sm:w-80 translate-x-0' : 'w-0 -translate-x-full sm:translate-x-0'
     } overflow-hidden flex flex-col`}>
       
       {/* Search */}

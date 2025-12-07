@@ -84,10 +84,10 @@ export default function StatsPanel({ stats }) {
   const animatedHealth = useAnimatedCounter(healthScore)
 
   return (
-    <div className={`fixed top-20 right-4 z-[1000] transition-all duration-700 ${
+    <div className={`fixed bottom-4 left-4 sm:bottom-auto sm:left-auto sm:top-20 sm:right-4 z-[1000] transition-all duration-700 ${
       isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-10'
     }`}>
-      <div className="relative bg-slate-900/95 backdrop-blur-xl border border-cyan-500/20 rounded-2xl p-4 shadow-2xl w-[260px] overflow-hidden">
+      <div className="relative bg-slate-900/95 backdrop-blur-xl border border-cyan-500/20 rounded-2xl p-3 sm:p-4 shadow-2xl w-auto sm:w-[260px] overflow-hidden">
         
         {/* Decorative glow */}
         <div className="absolute -top-10 -right-10 w-32 h-32 bg-cyan-500/20 rounded-full blur-3xl pointer-events-none"></div>

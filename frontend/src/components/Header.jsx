@@ -6,7 +6,9 @@ import {
   Bot,
   Table,
   Sparkles,
-  Keyboard
+  Keyboard,
+  Menu,
+  Filter
 } from 'lucide-react'
 import { useStore } from '../store/useStore'
 
@@ -18,35 +20,37 @@ export default function Header({ onLoginClick, onShowShortcuts }) {
     togglePriorityTable,
     toggleAssistant,
     showPriorityTable,
-    showAssistant
+    showAssistant,
+    toggleFilters,
+    showFilters
   } = useStore()
 
   return (
-    <header className="relative bg-slate-900/80 backdrop-blur-xl border-b border-cyan-500/20 px-6 py-3 flex items-center justify-between z-50">
+    <header className="relative bg-slate-900/80 backdrop-blur-xl border-b border-cyan-500/20 px-3 sm:px-6 py-2 sm:py-3 flex items-center justify-between z-50">
       {/* Gradient line at top */}
       <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-cyan-500 to-transparent"></div>
       
       {/* Logo */}
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-2 sm:gap-4">
         <div className="relative group">
           {/* Glow effect */}
           <div className="absolute inset-0 bg-cyan-500/50 rounded-xl blur-xl group-hover:blur-2xl transition-all opacity-50 group-hover:opacity-70"></div>
           
-          <div className="relative w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-400 via-blue-500 to-purple-600 p-[2px] shadow-lg shadow-cyan-500/30">
+          <div className="relative w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-cyan-400 via-blue-500 to-purple-600 p-[2px] shadow-lg shadow-cyan-500/30">
             <div className="w-full h-full rounded-[10px] bg-slate-900 flex items-center justify-center">
-              <Droplets className="w-6 h-6 text-cyan-400" />
+              <Droplets className="w-5 h-5 sm:w-6 sm:h-6 text-cyan-400" />
             </div>
           </div>
         </div>
         
         <div>
-          <h1 className="font-display font-black text-xl tracking-tight">
+          <h1 className="font-display font-black text-lg sm:text-xl tracking-tight">
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500">
               Gidro
             </span>
             <span className="text-white">Atlas</span>
           </h1>
-          <div className="flex items-center gap-2">
+          <div className="hidden sm:flex items-center gap-2">
             <p className="text-xs text-slate-400">
               Водные ресурсы Казахстана
             </p>
@@ -57,11 +61,20 @@ export default function Header({ onLoginClick, onShowShortcuts }) {
         </div>
       </div>
 
-      <div className="flex items-center gap-3">
-        {/* Shortcuts button */}
+      <div className="flex items-center gap-1 sm:gap-3">
+        {/* Mobile filter toggle */}
+        <button
+          onClick={toggleFilters}
+          className="sm:hidden flex items-center gap-2 p-2 rounded-xl bg-slate-800/50 border border-slate-700/50 text-slate-400 hover:text-white transition-all"
+          title="Фильтры"
+        >
+          <Filter className={`w-5 h-5 ${showFilters ? 'text-cyan-400' : ''}`} />
+        </button>
+
+        {/* Shortcuts button - hidden on mobile */}
         <button
           onClick={onShowShortcuts}
-          className="flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-800/50 border border-slate-700/50 text-slate-400 hover:text-white hover:border-cyan-500/30 transition-all"
+          className="hidden md:flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-800/50 border border-slate-700/50 text-slate-400 hover:text-white hover:border-cyan-500/30 transition-all"
           title="Горячие клавиши"
         >
           <Keyboard className="w-4 h-4" />

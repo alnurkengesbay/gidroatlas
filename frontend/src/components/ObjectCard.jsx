@@ -50,10 +50,10 @@ export default function ObjectCard({ object, onClose }) {
 
   return (
     <div 
-      className="fixed right-4 w-[380px] z-[9999] pointer-events-auto"
-      style={{ top: '80px', maxHeight: 'calc(100vh - 100px)' }}
+      className="fixed inset-x-0 bottom-0 sm:inset-x-auto sm:right-4 sm:bottom-auto w-full sm:w-[380px] z-[9999] pointer-events-auto"
+      style={{ top: 'auto', maxHeight: 'calc(100vh - 60px)' }}
     >
-      <div className="bg-slate-900/95 backdrop-blur-xl rounded-2xl flex flex-col overflow-hidden shadow-2xl border border-cyan-500/20" style={{ maxHeight: 'calc(100vh - 100px)' }}>
+      <div className="bg-slate-900/95 backdrop-blur-xl rounded-t-2xl sm:rounded-2xl flex flex-col overflow-hidden shadow-2xl border border-cyan-500/20 max-h-[70vh] sm:max-h-[calc(100vh-100px)]">
         {/* Header */}
         <div className="p-5 border-b border-cyan-500/20 shrink-0 bg-slate-900">
           <div className="flex items-start justify-between">

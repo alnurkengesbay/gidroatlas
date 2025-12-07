@@ -1,8 +1,15 @@
 const Database = require('better-sqlite3');
 const bcrypt = require('bcryptjs');
 const path = require('path');
+const fs = require('fs');
 
-const db = new Database(path.join(__dirname, '../data/gidroatlas.db'));
+// Ensure data directory exists
+const dataDir = path.join(__dirname, '../data');
+if (!fs.existsSync(dataDir)) {
+  fs.mkdirSync(dataDir, { recursive: true });
+}
+
+const db = new Database(path.join(dataDir, 'gidroatlas.db'));
 
 function initDatabase() {
   // Users table

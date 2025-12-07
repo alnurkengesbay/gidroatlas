@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
-import { Droplets, Map, BarChart3, Bot, ArrowRight, Sparkles } from 'lucide-react'
+import { Map, BarChart3, Bot, ArrowRight, Sparkles } from 'lucide-react'
+import logo from '../assets/logo.png'
 
 const features = [
   {
@@ -76,7 +77,7 @@ export default function WelcomeScreen({ onComplete }) {
             {/* Icon container */}
             <div className="relative w-28 h-28 rounded-3xl bg-gradient-to-br from-cyan-400 via-blue-500 to-purple-600 p-1 shadow-2xl shadow-cyan-500/30">
               <div className="w-full h-full rounded-[22px] bg-slate-900 flex items-center justify-center">
-                <Droplets className="w-14 h-14 text-cyan-400" />
+                <img src={logo} alt="GidroAtlas" className="w-16 h-16 rounded-xl" />
               </div>
             </div>
             

@@ -1,5 +1,4 @@
 import { 
-  Droplets, 
   LogIn, 
   LogOut, 
   User, 
@@ -12,6 +11,7 @@ import {
   Upload
 } from 'lucide-react'
 import { useStore } from '../store/useStore'
+import logo from '../assets/logo.png'
 
 export default function Header({ onLoginClick, onShowShortcuts, onShowUpload }) {
   const { 
@@ -37,10 +37,8 @@ export default function Header({ onLoginClick, onShowShortcuts, onShowUpload }) 
           {/* Glow effect */}
           <div className="absolute inset-0 bg-cyan-500/50 rounded-xl blur-xl group-hover:blur-2xl transition-all opacity-50 group-hover:opacity-70"></div>
           
-          <div className="relative w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-cyan-400 via-blue-500 to-purple-600 p-[2px] shadow-lg shadow-cyan-500/30">
-            <div className="w-full h-full rounded-[10px] bg-slate-900 flex items-center justify-center">
-              <Droplets className="w-5 h-5 sm:w-6 sm:h-6 text-cyan-400" />
-            </div>
+          <div className="relative w-10 h-10 sm:w-12 sm:h-12 rounded-xl overflow-hidden shadow-lg shadow-cyan-500/30">
+            <img src={logo} alt="GidroAtlas" className="w-full h-full object-cover" />
           </div>
         </div>
         

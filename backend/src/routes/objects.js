@@ -10,13 +10,14 @@ function calculatePriority(technicalCondition, passportDate) {
   const passport = new Date(passportDate);
   const ageInYears = (now - passport) / (1000 * 60 * 60 * 24 * 365);
   
-  // PriorityScore = (6 - состояние) * 3 + возраст паспорта в годах
-  const score = (6 - technicalCondition) * 3 + ageInYears;
+  // PriorityScore = состояние * 3 + возраст паспорта в годах
+  // Чем хуже состояние (5) и старше паспорт - тем выше приоритет
+  const score = technicalCondition * 3 + ageInYears;
   
   let level;
-  if (score >= 12) level = 'high';
-  else if (score >= 6) level = 'medium';
-  else level = 'low';
+  if (score >= 15) level = 'high';      // состояние 4+ или 3 с 6+ лет
+  else if (score >= 9) level = 'medium'; // состояние 2-3 со старым паспортом
+  else level = 'low';                    // хорошее состояние, свежий паспорт
   
   return { score: Math.round(score * 100) / 100, level };
 }

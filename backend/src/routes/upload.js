@@ -4,7 +4,7 @@ const XLSX = require('xlsx');
 const path = require('path');
 const fs = require('fs');
 const axios = require('axios');
-const pdf = require('pdf-parse');
+const pdfParse = require('pdf-parse');
 const mammoth = require('mammoth');
 const { db } = require('../database');
 
@@ -200,8 +200,8 @@ async function parseFile(filePath, ext) {
   
   if (ext === '.pdf') {
     const dataBuffer = fs.readFileSync(filePath);
-    const pdfData = await pdf(dataBuffer);
-    return { type: 'text', data: pdfData.text, pages: pdfData.numpages };
+    const pdfData = await pdfParse(dataBuffer);
+    return { type: 'text', data: pdfData.text || '', pages: pdfData.numpages || 1 };
   }
   
   if (ext === '.doc' || ext === '.docx') {

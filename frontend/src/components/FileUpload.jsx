@@ -8,7 +8,9 @@ import {
   Loader2,
   Sparkles,
   FileJson,
-  Table
+  Table,
+  FileText,
+  File
 } from 'lucide-react'
 import api from '../api'
 
@@ -36,16 +38,16 @@ export default function FileUpload({ onClose, onSuccess }) {
   }
 
   const validateAndSetFile = (f) => {
-    const allowedTypes = ['.csv', '.xlsx', '.xls', '.json']
+    const allowedTypes = ['.csv', '.xlsx', '.xls', '.json', '.pdf', '.doc', '.docx']
     const ext = f.name.toLowerCase().slice(f.name.lastIndexOf('.'))
     
     if (!allowedTypes.includes(ext)) {
-      setError('Поддерживаются только CSV, Excel и JSON файлы')
+      setError('Поддерживаются: CSV, Excel, JSON, PDF, Word')
       return
     }
     
-    if (f.size > 10 * 1024 * 1024) {
-      setError('Файл слишком большой (макс. 10MB)')
+    if (f.size > 20 * 1024 * 1024) {
+      setError('Файл слишком большой (макс. 20MB)')
       return
     }
     
@@ -97,6 +99,8 @@ export default function FileUpload({ onClose, onSuccess }) {
     const ext = file.name.toLowerCase()
     if (ext.endsWith('.json')) return <FileJson className="w-12 h-12 text-yellow-500" />
     if (ext.endsWith('.csv')) return <Table className="w-12 h-12 text-green-500" />
+    if (ext.endsWith('.pdf')) return <FileText className="w-12 h-12 text-red-500" />
+    if (ext.endsWith('.doc') || ext.endsWith('.docx')) return <File className="w-12 h-12 text-blue-500" />
     return <FileSpreadsheet className="w-12 h-12 text-emerald-500" />
   }
 
@@ -145,7 +149,7 @@ export default function FileUpload({ onClose, onSuccess }) {
             <input
               ref={fileInputRef}
               type="file"
-              accept=".csv,.xlsx,.xls,.json"
+              accept=".csv,.xlsx,.xls,.json,.pdf,.doc,.docx"
               onChange={handleFileSelect}
               className="hidden"
             />
@@ -166,7 +170,7 @@ export default function FileUpload({ onClose, onSuccess }) {
                     Перетащите файл или нажмите для выбора
                   </p>
                   <p className="text-sm text-slate-500">
-                    CSV, Excel, JSON (макс. 10MB)
+                    CSV, Excel, JSON, PDF, Word (макс. 20MB)
                   </p>
                 </>
               )}
@@ -177,11 +181,11 @@ export default function FileUpload({ onClose, onSuccess }) {
           <div className="mt-4 p-3 rounded-xl bg-purple-500/10 border border-purple-500/20">
             <div className="flex items-center gap-2 text-purple-400 text-sm">
               <Sparkles className="w-4 h-4" />
-              <span className="font-medium">AI Стандартизация</span>
+              <span className="font-medium">AI Извлечение и Стандартизация</span>
             </div>
             <p className="text-xs text-slate-400 mt-1">
-              GPT автоматически преобразует данные в стандартный формат, 
-              определит тип объекта, регион и техническое состояние
+              <strong>PDF/Word:</strong> AI извлечёт все водные объекты из текста документа<br/>
+              <strong>CSV/Excel:</strong> AI стандартизирует данные в единый формат
             </p>
           </div>
 

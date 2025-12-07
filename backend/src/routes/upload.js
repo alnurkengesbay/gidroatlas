@@ -4,6 +4,8 @@ const XLSX = require('xlsx');
 const path = require('path');
 const fs = require('fs');
 const axios = require('axios');
+const pdfParse = require('pdf-parse');
+const mammoth = require('mammoth');
 const { db } = require('../database');
 
 const router = express.Router();
@@ -25,14 +27,14 @@ const storage = multer.diskStorage({
 
 const upload = multer({ 
   storage,
-  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB
+  limits: { fileSize: 20 * 1024 * 1024 }, // 20MB for PDFs
   fileFilter: (req, file, cb) => {
-    const allowedTypes = ['.csv', '.xlsx', '.xls', '.json'];
+    const allowedTypes = ['.csv', '.xlsx', '.xls', '.json', '.pdf', '.doc', '.docx'];
     const ext = path.extname(file.originalname).toLowerCase();
     if (allowedTypes.includes(ext)) {
       cb(null, true);
     } else {
-      cb(new Error('Поддерживаются только CSV, Excel и JSON файлы'));
+      cb(new Error('Поддерживаются: CSV, Excel, JSON, PDF, Word'));
     }
   }
 });
@@ -40,6 +42,74 @@ const upload = multer({
 // RapidAPI GPT configuration
 const AI_API_URL = 'https://gpt-4o-mini.p.rapidapi.com/chat/completions';
 const AI_API_KEY = process.env.RAPIDAPI_KEY || '9a0f172768mshc46725afc0019dfp172bddjsn73455f16dc83';
+
+// Extract objects from text document (PDF/Word)
+async function extractFromText(text) {
+  const prompt = `Ты — система извлечения данных о водных объектах Казахстана из документов.
+
+Проанализируй следующий текст документа и извлеки ВСЕ упомянутые водные объекты.
+
+ТЕКСТ ДОКУМЕНТА:
+${text.slice(0, 8000)}
+
+ЗАДАЧА:
+Найди все упоминания водных объектов (плотины, водохранилища, озёра, каналы, шлюзы, гидроузлы) и извлеки информацию о каждом.
+
+Для каждого объекта определи:
+1. name — название объекта
+2. resource_type — тип: озеро, канал, водохранилище, шлюз, гидроузел, плотина
+3. region — область Казахстана (если указана)
+4. water_type — пресная/непресная (если указано)
+5. technical_condition — состояние 1-5 (1=отлично, 5=аварийное)
+6. passport_date — дата документа/обследования (YYYY-MM-DD)
+7. description — краткое описание из документа
+8. latitude/longitude — координаты (если указаны, иначе примерные для региона)
+
+Верни ТОЛЬКО валидный JSON массив:
+[{
+  "name": "string",
+  "region": "string область",
+  "resource_type": "озеро|канал|водохранилище|шлюз|гидроузел|плотина",
+  "water_type": "пресная|непресная|null",
+  "fauna": false,
+  "passport_date": "YYYY-MM-DD",
+  "technical_condition": 1-5,
+  "latitude": number,
+  "longitude": number,
+  "description": "string"
+}]
+
+Если объектов не найдено — верни пустой массив [].
+Генерируй разумные координаты для Казахстана если не указаны.`;
+
+  try {
+    const response = await axios.post(AI_API_URL, {
+      model: 'gpt-4o-mini',
+      messages: [
+        { role: 'system', content: 'Ты система извлечения данных из документов. Отвечай ТОЛЬКО валидным JSON.' },
+        { role: 'user', content: prompt }
+      ],
+      temperature: 0.3,
+      max_tokens: 4000
+    }, {
+      headers: {
+        'Content-Type': 'application/json',
+        'x-rapidapi-host': 'gpt-4o-mini.p.rapidapi.com',
+        'x-rapidapi-key': AI_API_KEY
+      }
+    });
+
+    const content = response.data.choices[0]?.message?.content || '[]';
+    const jsonMatch = content.match(/\[[\s\S]*\]/);
+    if (jsonMatch) {
+      return JSON.parse(jsonMatch[0]);
+    }
+    return [];
+  } catch (error) {
+    console.error('AI extraction error:', error.message);
+    throw new Error('Ошибка AI извлечения данных');
+  }
+}
 
 // Standardize data using AI
 async function standardizeWithAI(rawData) {
@@ -115,17 +185,28 @@ ${JSON.stringify(rawData, null, 2)}
 }
 
 // Parse uploaded file
-function parseFile(filePath, ext) {
+async function parseFile(filePath, ext) {
   if (ext === '.json') {
     const content = fs.readFileSync(filePath, 'utf-8');
-    return JSON.parse(content);
+    return { type: 'structured', data: JSON.parse(content) };
   }
   
   if (ext === '.csv' || ext === '.xlsx' || ext === '.xls') {
     const workbook = XLSX.readFile(filePath);
     const sheetName = workbook.SheetNames[0];
     const sheet = workbook.Sheets[sheetName];
-    return XLSX.utils.sheet_to_json(sheet);
+    return { type: 'structured', data: XLSX.utils.sheet_to_json(sheet) };
+  }
+  
+  if (ext === '.pdf') {
+    const dataBuffer = fs.readFileSync(filePath);
+    const pdfData = await pdfParse(dataBuffer);
+    return { type: 'text', data: pdfData.text, pages: pdfData.numpages };
+  }
+  
+  if (ext === '.doc' || ext === '.docx') {
+    const result = await mammoth.extractRawText({ path: filePath });
+    return { type: 'text', data: result.value };
   }
   
   throw new Error('Неподдерживаемый формат файла');
@@ -192,32 +273,54 @@ router.post('/', upload.single('file'), async (req, res) => {
 
     // 1. Parse file
     console.log('📄 Parsing file:', req.file.originalname);
-    const rawData = parseFile(filePath, ext);
+    const parsed = await parseFile(filePath, ext);
     
-    if (!Array.isArray(rawData) || rawData.length === 0) {
-      fs.unlinkSync(filePath);
-      return res.status(400).json({ error: 'Файл пуст или имеет неверный формат' });
-    }
+    let allStandardized = [];
+    let originalCount = 0;
 
-    console.log(`📊 Found ${rawData.length} records`);
-
-    // 2. Standardize with AI (process in batches of 10)
-    const batchSize = 10;
-    const allStandardized = [];
-    
-    for (let i = 0; i < rawData.length; i += batchSize) {
-      const batch = rawData.slice(i, i + batchSize);
-      console.log(`🤖 Processing batch ${Math.floor(i/batchSize) + 1}/${Math.ceil(rawData.length/batchSize)}`);
+    // 2. Process based on file type
+    if (parsed.type === 'text') {
+      // PDF or Word - extract objects from text
+      console.log(`📝 Text document, ${parsed.data.length} characters`);
+      originalCount = 1; // 1 document
       
+      console.log('🤖 Extracting objects from document...');
       try {
-        const standardized = await standardizeWithAI(batch);
-        allStandardized.push(...standardized);
+        allStandardized = await extractFromText(parsed.data);
+        console.log(`✅ Extracted ${allStandardized.length} objects`);
       } catch (error) {
-        console.error(`Batch error:`, error.message);
+        console.error('Extraction error:', error.message);
+      }
+      
+    } else {
+      // Structured data (CSV, Excel, JSON)
+      const rawData = parsed.data;
+      
+      if (!Array.isArray(rawData) || rawData.length === 0) {
+        fs.unlinkSync(filePath);
+        return res.status(400).json({ error: 'Файл пуст или имеет неверный формат' });
+      }
+
+      originalCount = rawData.length;
+      console.log(`📊 Found ${rawData.length} records`);
+
+      // Standardize with AI (process in batches of 10)
+      const batchSize = 10;
+      
+      for (let i = 0; i < rawData.length; i += batchSize) {
+        const batch = rawData.slice(i, i + batchSize);
+        console.log(`🤖 Processing batch ${Math.floor(i/batchSize) + 1}/${Math.ceil(rawData.length/batchSize)}`);
+        
+        try {
+          const standardized = await standardizeWithAI(batch);
+          allStandardized.push(...standardized);
+        } catch (error) {
+          console.error(`Batch error:`, error.message);
+        }
       }
     }
 
-    console.log(`✅ Standardized ${allStandardized.length} records`);
+    console.log(`✅ Total standardized: ${allStandardized.length} records`);
 
     // 3. Save to database
     const saveResults = saveObjects(allStandardized);
@@ -228,7 +331,8 @@ router.post('/', upload.single('file'), async (req, res) => {
     // 5. Return results
     res.json({
       message: 'Файл обработан',
-      original_count: rawData.length,
+      file_type: parsed.type,
+      original_count: originalCount,
       standardized_count: allStandardized.length,
       saved_count: saveResults.success,
       errors: saveResults.errors,

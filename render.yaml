@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: gidroatlas
+    env: node
+    region: frankfurt
+    plan: free
+    buildCommand: cd frontend && npm install && npm run build && cd ../backend && npm install
+    startCommand: cd backend && npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: JWT_SECRET
+        generateValue: true
+      - key: RAPIDAPI_KEY
+        sync: false
+

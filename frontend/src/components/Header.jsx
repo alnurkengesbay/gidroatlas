@@ -8,11 +8,12 @@ import {
   Sparkles,
   Keyboard,
   Menu,
-  Filter
+  Filter,
+  Upload
 } from 'lucide-react'
 import { useStore } from '../store/useStore'
 
-export default function Header({ onLoginClick, onShowShortcuts }) {
+export default function Header({ onLoginClick, onShowShortcuts, onShowUpload }) {
   const { 
     user, 
     isAuthenticated, 
@@ -112,6 +113,16 @@ export default function Header({ onLoginClick, onShowShortcuts }) {
                 <Sparkles className="w-3 h-3 text-yellow-400" />
               </button>
             </div>
+            
+            {/* Import button */}
+            <button
+              onClick={onShowUpload}
+              className="flex items-center gap-2 px-3 py-2 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20 transition-all"
+              title="Импорт данных"
+            >
+              <Upload className="w-4 h-4" />
+              <span className="text-sm font-medium hidden sm:inline">Импорт</span>
+            </button>
             
             <div className="w-px h-8 bg-slate-700" />
           </>

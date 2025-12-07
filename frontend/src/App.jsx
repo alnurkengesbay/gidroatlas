@@ -12,6 +12,7 @@ import LoginModal from './components/LoginModal'
 import StatsPanel from './components/StatsPanel'
 import WelcomeScreen from './components/WelcomeScreen'
 import KeyboardShortcuts from './components/KeyboardShortcuts'
+import FileUpload from './components/FileUpload'
 
 function App() {
   const { 
@@ -34,6 +35,7 @@ function App() {
     return !localStorage.getItem('gidroatlas_visited')
   })
   const [showShortcuts, setShowShortcuts] = useState(false)
+  const [showUpload, setShowUpload] = useState(false)
 
   // Keyboard shortcuts
   const handleKeyDown = useCallback((e) => {
@@ -132,7 +134,11 @@ function App() {
 
   return (
     <div className="h-screen w-screen overflow-hidden flex flex-col">
-      <Header onLoginClick={() => setShowLogin(true)} onShowShortcuts={() => setShowShortcuts(true)} />
+      <Header 
+        onLoginClick={() => setShowLogin(true)} 
+        onShowShortcuts={() => setShowShortcuts(true)} 
+        onShowUpload={() => setShowUpload(true)}
+      />
       
       <div className="flex-1 flex relative overflow-hidden">
         <Sidebar />
@@ -165,6 +171,16 @@ function App() {
       {/* Keyboard shortcuts modal */}
       {showShortcuts && <KeyboardShortcuts onClose={() => setShowShortcuts(false)} />}
       
+      {/* File upload modal */}
+      {showUpload && (
+        <FileUpload 
+          onClose={() => setShowUpload(false)} 
+          onSuccess={() => {
+            // Reload data after successful import
+            loadData()
+          }}
+        />
+      )}
     </div>
   )
 }

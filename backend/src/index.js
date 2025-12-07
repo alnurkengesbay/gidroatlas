@@ -5,6 +5,7 @@ const path = require('path');
 const authRoutes = require('./routes/auth');
 const objectsRoutes = require('./routes/objects');
 const analyticsRoutes = require('./routes/analytics');
+const uploadRoutes = require('./routes/upload');
 const { initDatabase } = require('./database');
 
 const app = express();
@@ -25,6 +26,7 @@ initDatabase();
 app.use('/api/auth', authRoutes);
 app.use('/api/objects', objectsRoutes);
 app.use('/api/analytics', analyticsRoutes);
+app.use('/api/upload', uploadRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {

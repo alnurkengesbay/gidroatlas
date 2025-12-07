@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { 
   X, 
   MapPin, 
@@ -9,6 +10,7 @@ import {
   TrendingUp,
   Clock
 } from 'lucide-react'
+import PassportModal from './PassportModal'
 
 const conditionLabels = {
   1: { text: 'Отличное', color: 'bg-green-500', textColor: 'text-green-400' },
@@ -34,6 +36,7 @@ const priorityLabels = {
 }
 
 export default function ObjectCard({ object, onClose }) {
+  const [showPassport, setShowPassport] = useState(false)
   const condition = conditionLabels[object.technical_condition]
   const priority = priorityLabels[object.priority?.level]
   
@@ -251,7 +254,7 @@ export default function ObjectCard({ object, onClose }) {
         {/* Footer */}
         <div className="p-4 border-t border-cyan-500/20 shrink-0 bg-slate-900">
           <button
-            onClick={() => alert('PDF паспорт в разработке')}
+            onClick={() => setShowPassport(true)}
             className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-medium transition-colors text-sm"
           >
             <FileText className="w-4 h-4" />
@@ -259,6 +262,14 @@ export default function ObjectCard({ object, onClose }) {
           </button>
         </div>
       </div>
+
+      {/* Passport Modal */}
+      {showPassport && (
+        <PassportModal 
+          object={object} 
+          onClose={() => setShowPassport(false)} 
+        />
+      )}
     </div>
   )
 }
